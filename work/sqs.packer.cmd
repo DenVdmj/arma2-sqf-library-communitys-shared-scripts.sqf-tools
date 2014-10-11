@@ -1,5 +1,5 @@
 @rem='
-@perl.exe "%~dpnx0" %*
+@"%~dp0/bin/perl.exe" -I"%~dp0lib" "%~dpnx0" %*
 @exit
 @rem';
 
@@ -9,7 +9,7 @@ require 'sqf.utils.pl';
 my ($source, $target) = @ARGV;
 
 die qq(File "mcpp.exe" not found \nPlease get mcpp.exe from http://sourceforge.net/projects/mcpp/\n)
-    unless -f 'mcpp.exe';
+    unless -f './bin/mcpp.exe';
 
 die qq(No input sqf-file specified\n)
     unless $source;
@@ -22,7 +22,7 @@ die qq(File not found: "$source"\n)
     my $packedFilename       = $target || "$source.(packed).sqf";
     my $sourceText = readfile($source);
     local *hndlMCPP;
-    open (hndlMCPP, qq(| mcpp.exe -P -+ >$preprocessedFilename));
+    open (hndlMCPP, qq(| "./bin/mcpp.exe" -P -+ >$preprocessedFilename));
     print hndlMCPP $sourceText;
     close (hndlMCPP);
     writefile($packedFilename, sqf_pack(readfile($preprocessedFilename)));
