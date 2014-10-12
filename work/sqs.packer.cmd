@@ -25,11 +25,11 @@ die qq(File not found: "$source"\n)
     open (hndlMCPP, qq(| "./bin/mcpp.exe" -P -+ >$preprocessedFilename));
     print hndlMCPP $sourceText;
     close (hndlMCPP);
-    writefile($packedFilename, sqf_pack(readfile($preprocessedFilename)));
+    writefile($packedFilename, sqfpack(readfile($preprocessedFilename)));
 }
 
-sub sqf_pack {
-    return sqf_process(shift, sub {
+sub sqfpack {
+    return sqflockup(shift, sub {
         my $chunk = shift;
         # сжать пробелы и переводы строк
         $chunk =~ s/\s\s+/ /g;

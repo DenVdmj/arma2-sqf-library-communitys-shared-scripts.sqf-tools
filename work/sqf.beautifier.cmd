@@ -10,7 +10,7 @@ my $targetdir = shift;
 die qq(No input directory specified\n) unless $targetdir;
 die qq(Input directory not found: "$targetdir"\n) unless -d $targetdir;
 
-my %commands = map { lc $_, $_ } do 'sqf.commands.pl';
+my $commands = loadSQFCommands('lib/sqf.commands.lst') or die;
 
 foreachdirs(
     path => $targetdir,
@@ -31,7 +31,7 @@ sub beautify {
     my $indent = ' ' x 4;
     my $deep = 0;
 
-    writefile($filename, sqf_process($text, sub {
+    writefile($filename, sqflockup($text, sub {
 
         my $chunk = shift;
 
@@ -49,7 +49,7 @@ sub beautify {
         # single-line "while" code
         $chunk =~ s/while\s*\{\s*([^\{\}\;\n]+)\s*\}/while \{ $1 \}/gis;
 
-        # formating for other keywords
+        # formatting for other keywords
         $chunk =~ s/while\s*\{/while \{/gis;
         $chunk =~ s/\s*do\s*\{/ do \{/gis;
         $chunk =~ s/if\s*\(/if (/gis;
@@ -77,7 +77,7 @@ sub beautify {
 
         # camelize command names
         $chunk =~ s{\b(\w+)\b}{
-            exists $commands{lc $1} ? $commands{lc $1} : $1
+            exists $commands->{lc $1} ? $commands->{lc $1} : $1
         }egis;
 
         return $chunk;
