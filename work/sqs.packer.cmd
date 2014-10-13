@@ -20,12 +20,15 @@ die qq(File not found: "$source"\n)
 {
     my $preprocessedFilename = $target || "$source.(preprocessed).sqf";
     my $packedFilename       = $target || "$source.(packed).sqf";
+    my $minifiedFilename     = $target || "$source.(minified).sqf";
     my $sourceText = readfile($source);
     local *hndlMCPP;
     open (hndlMCPP, qq(| "./bin/mcpp.exe" -P -+ >$preprocessedFilename));
     print hndlMCPP $sourceText;
     close (hndlMCPP);
-    writefile($packedFilename, sqfpack(readfile($preprocessedFilename)));
+    my $packedtext = sqfpack(readfile($preprocessedFilename));
+    writefile($packedFilename, $packedtext);
+    writefile($minifiedFilename, minifyVarNames($packedtext));
 }
 
 sub sqfpack {
@@ -44,4 +47,45 @@ sub sqfpack {
         return $chunk;
     });
 }
+
+sub minifyVarNames {
+    my $text = shift;
+    my $names = {};
+    my $counter = 0;
+    $text =~ s/(_\w+)/_X$1/g;
+    $text =~ s{\b(_\w+)\b}{
+        my $varname = $1;
+        my $varnamelc = lc $varname;
+        $names->{$varnamelc} = '_' . intToBase36($counter++)
+            unless defined $names->{$varnamelc};
+        $names->{$varnamelc};
+    }egis;
+    return $text;
+}
+
+BEGIN {
+
+    my @basechars = map { chr $_ } (48 .. 57, 65 .. 90, 97 .. 122, 95);
+
+    sub intToRadix {
+        my ($number, $radix, @range) = @_;
+        my $offset = @range && length @range == 1 ? 10 : 0;
+        my @chars = @range && length @range > 1 ? map { chr $_ } @range : @basechars;
+        my $result = '';
+        $radix = 16 unless $radix;
+        while ($number) {
+            $result = @chars [ $offset + int ( $number % $radix ) ] . $result;
+            $number = int ($number / $radix);
+        }
+        return $result || 0;
+    }
+
+    sub intToBase36 {
+        return intToRadix(shift, 36);
+    }
+}
+
+
+
+
 
