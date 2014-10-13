@@ -52,7 +52,7 @@ sub minifyVarNames {
     my $text = shift;
     my $names = {};
     my $counter = 0;
-    $text =~ s/(_\w+)/_X$1/g;
+    $text =~ s/\b(_\w+)\b/_X$1/g;
     $text =~ s{\b(_\w+)\b}{
         my $varname = $1;
         my $varnamelc = lc $varname;
