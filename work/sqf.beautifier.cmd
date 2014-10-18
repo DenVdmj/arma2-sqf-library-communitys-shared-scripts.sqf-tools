@@ -1,6 +1,6 @@
 @rem='
 @"%~dp0/bin/perl.exe" -I"%~dp0lib" "%~dpnx0" %*
-@exit
+@goto:eof
 @rem';
 use strict;
 require 'sqf.utils.pl';

@@ -1,15 +1,15 @@
 @rem='
-@"%~dp0/bin/perl.exe" -I"%~dp0lib" "%~dpnx0" %*
-@exit
+@"%~dp0/bin/perl.exe" -I"%~dp0lib" "%~dpnx0" "%~dp0bin" %*
+@goto:eof
 @rem';
 
 use strict;
 require 'sqf.utils.pl';
 
-my ($source, $target) = @ARGV;
+my ($bindir, $source, $target) = @ARGV;
 
 die qq(File "mcpp.exe" not found \nPlease get mcpp.exe from http://sourceforge.net/projects/mcpp/\n)
-    unless -f './bin/mcpp.exe';
+    unless -f "$bindir/mcpp.exe";
 
 die qq(No input sqf-file specified\n)
     unless $source;
@@ -23,7 +23,7 @@ die qq(File not found: "$source"\n)
     my $minifiedFilename     = $target || "$source.(minified).sqf";
     my $sourceText = readfile($source);
     local *hndlMCPP;
-    open (hndlMCPP, qq(| "./bin/mcpp.exe" -P -+ >$preprocessedFilename));
+    open (hndlMCPP, qq(| "$bindir/mcpp.exe" -P -+ >$preprocessedFilename));
     print hndlMCPP $sourceText;
     close (hndlMCPP);
     my $packedtext = sqfpack(readfile($preprocessedFilename));
@@ -56,16 +56,20 @@ sub minifyVarNames {
     $text =~ s{\b(_\w+)\b}{
         my $varname = $1;
         my $varnamelc = lc $varname;
-        $names->{$varnamelc} = '_' . intToBase36($counter++)
-            unless defined $names->{$varnamelc};
-        $names->{$varnamelc};
+        if ($varname =~ /^_x_(this|x)/i) {
+            $varname;
+        } else {
+            $names->{$varnamelc} = '_' . createname($counter++) unless defined $names->{$varnamelc};
+            $names->{$varnamelc};
+        }
     }egis;
+    $text =~ s/\b_x_(this|x)\b/_$1/gi;
     return $text;
 }
 
 BEGIN {
 
-    my @basechars = map { chr $_ } (48 .. 57, 65 .. 90, 97 .. 122, 95);
+    my @basechars = map { chr $_ } (48 .. 57, 97 .. 119, 122);
 
     sub intToRadix {
         my ($number, $radix, @range) = @_;
@@ -80,12 +84,7 @@ BEGIN {
         return $result || 0;
     }
 
-    sub intToBase36 {
-        return intToRadix(shift, 36);
+    sub createname {
+        return intToRadix(shift, 34);
     }
 }
-
-
-
-
-
