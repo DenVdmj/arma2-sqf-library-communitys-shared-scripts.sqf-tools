@@ -1,1 +1,2 @@
-_other/
+syntax: re
+(^|/)[\W_]?te?mp([\W_].*)?/

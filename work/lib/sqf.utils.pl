@@ -44,13 +44,14 @@ sub writefile {
 }
 
 sub foreachdirs {
-    # ( path => string, open => sub, proc => sub, close => sub )
+    # ( path => string, open => sub, proc => sub, close => sub, sort => sub )
+    # ( path, open => sub, proc => sub, close => sub, file => sub, sort => sub )
+
     my %option = @_;
     my $deep = 0;
 
-    _traversal($option {'path'});
-
-    sub _traversal {
+    my $_traversal;
+    $_traversal = sub {
 
         my ($path) = @_;
 
@@ -73,12 +74,14 @@ sub foreachdirs {
         foreach my $filename (@filelist) {
             next if $filename eq '.' or $filename eq '..';
             $deep++;
-            _traversal->($path . '\\' . $filename);
+            $_traversal->($path . '\\' . $filename);
             $deep--;
         }
 
         $option {'close'} -> ($path, $deep) if $option {'close'};
-    }
+    };
+
+    $_traversal->( $option {'path'} );
 }
 
 1;
