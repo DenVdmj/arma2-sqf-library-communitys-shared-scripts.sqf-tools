@@ -50,6 +50,7 @@ sub beautify {
         $chunk =~ s/while\s*\{\s*([^\{\}\;\n]+)\s*\}/while \{ $1 \}/gis;
 
         # formatting for other keywords
+        $chunk =~ s/call\s*\{/call \{/gis;
         $chunk =~ s/while\s*\{/while \{/gis;
         $chunk =~ s/\s*do\s*\{/ do \{/gis;
         $chunk =~ s/if\s*\(/if (/gis;
