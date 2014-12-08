@@ -47,11 +47,17 @@ BEGIN {
             $chunk =~ s/^\s+//;
             # удалить финальные пробелы и переводы строк
             $chunk =~ s/\s+$//;
+            # удалить некоторые очевидно лишние скобки,
+            # которые часто остаются от развернутых макро
+            $chunk =~ s/(\w+)\((\w+)\)/$1 $2/g;
+            $chunk =~ s/\((\([^\(\)]+\))\)/$1/g;
+            $chunk =~ s/\((\([^\(\)]+\))\)/$1/g;
+            $chunk =~ s/(\;|\,|\[|\=)\(([^\(\)]+)\)(\;|\,|\])/$1$2$3/g;
             return $chunk;
         });
     }
 
-    my $reservedVariableNames = qr/_x|_this|_time|_exception|_pos|_units|_shift|_alt|_id|_uid|_name|_from|_to/;
+    my $reservedVariableNames = qr/_time|_this|_x|_forEachIndex|_exception|_pos|_units|_shift|_alt|_id|_uid|_name|_from|_to/;
 
     sub minifyVarNames {
         my $text = shift;
@@ -91,3 +97,10 @@ BEGIN {
         return intToRadix(shift, 34);
     }
 }
+
+
+
+
+
+
+
